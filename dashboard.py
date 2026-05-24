@@ -452,6 +452,15 @@ async def api_camera_snapshot():
     except Exception:
         return Response(status_code=502)
 
+@app.get("/hlab.gif")
+async def hlab_gif():
+    """Serve the hlab title GIF."""
+    from fastapi.responses import FileResponse
+    gif_path = os.path.expanduser("~/rig-dashboard/hlab.gif")
+    if os.path.exists(gif_path):
+        return FileResponse(gif_path, media_type="image/gif")
+    return Response(status_code=404)
+
 @app.get("/homelab.gif")
 async def homelab_gif():
     """Serve the homelab pixel-art GIF."""
@@ -604,7 +613,7 @@ async def index():
 <div class="container">
   <div class="logo-block">
     <img src="/homelab.gif" alt="" class="logo-gif">
-    <img src="/logo.png?v=2" alt="THE SPRAWL" class="logo-text-img">
+    <img src="/hlab.gif" alt="THE SPRAWL" class="logo-text-img">
   </div>
   <div class="header">
     <div style="text-align:right;font-size:10px;color:var(--text);" id="uptime">UPTIME …</div>
