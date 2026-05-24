@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+ip_cache.json
+sparkline_history.json
+/tmp/
+*.log
