@@ -152,14 +152,43 @@ def get_journal(limit=10):
         return []
 
 FOX_CACHE = os.path.expanduser("~/.openclaw/workspace/data/foxess_cache.json")
+FOX_HISTORY = os.path.expanduser("~/rig-dashboard/fox_history.json")
 def get_foxess():
     """FoxESS solar + battery from cached poll."""
+    data = {}
     if os.path.exists(FOX_CACHE):
         try:
             with open(FOX_CACHE) as f:
-                return json.load(f)
+                data = json.load(f)
         except: pass
-    return {}
+
+    # Append current snapshot to history ring buffer (60 points)
+    if data and data.get("sn"):
+        history = []
+        if os.path.exists(FOX_HISTORY):
+            try:
+                with open(FOX_HISTORY) as f:
+                    history = json.load(f)
+            except: pass
+        if not isinstance(history, list):
+            history = []
+        history.append({
+            "ts": int(time.time()),
+            "solar_kw": round(data.get("solar_kw", 0), 3),
+            "home_load_kw": round(data.get("home_load_kw", 0), 3),
+            "grid_import_kw": round(data.get("grid_import_kw", 0), 3),
+            "grid_export_kw": round(data.get("grid_export_kw", 0), 3),
+            "battery_soc_pct": data.get("battery_soc_pct"),
+        })
+        # Keep last 90 points (90 minutes at 1/min poll)
+        if len(history) > 90:
+            history = history[-90:]
+        try:
+            with open(FOX_HISTORY, 'w') as f:
+                json.dump(history, f)
+        except: pass
+        data["_history"] = history
+    return data
 
 def get_frigate():
     """Frigate NVR status."""
@@ -1066,13 +1095,21 @@ async function refresh() {
 
         const points = 60;
         let solarVals = [], homeVals = [], gridVals = [];
-        if (fox.solar_kw !== undefined) {
+        const hist = fox._history || [];
+        if (hist.length >= 2) {
+          // Use real history data
+          solarVals = hist.map(p => p.solar_kw || 0);
+          homeVals = hist.map(p => p.home_load_kw || 0);
+          gridVals = hist.map(p => (p.grid_import_kw || 0) - (p.grid_export_kw || 0));
+        } else {
+          // Fallback: synthetic based on current snapshot
           for (let i = 0; i < points; i++) {
             let phase = i / points * Math.PI;
             solarVals.push(Math.max(0, fox.solar_kw * (0.15 + 1.3 * Math.sin(phase))));
             homeVals.push(fox.home_load_kw * (0.7 + 0.6 * Math.sin(i * 0.3)));
             gridVals.push(fox.grid_import_kw * (0.5 + Math.abs(0.8 * Math.sin(i * 0.25))));
           }
+        }
 
           const maxVal = Math.max(
             ...solarVals, ...homeVals, ...gridVals, 0.5
@@ -1119,7 +1156,6 @@ async function refresh() {
           ctx.fillText(maxVal.toFixed(1)+' kW', w - 40, h - 2);
         }
       }
-    }
 
   } catch(e) { console.error(e); }
 }
