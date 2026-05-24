@@ -461,6 +461,16 @@ async def hlab_gif():
         return FileResponse(gif_path, media_type="image/gif")
     return Response(status_code=404)
 
+@app.get("/icons/{name}")
+async def icon_gif(name: str):
+    """Serve icon GIFs from the icons folder."""
+    from fastapi.responses import FileResponse
+    safe = name.replace("..", "").replace("/", "").replace("\\", "")
+    gif_path = os.path.expanduser(f"~/rig-dashboard/icons/{safe}")
+    if os.path.exists(gif_path):
+        return FileResponse(gif_path, media_type="image/gif")
+    return Response(status_code=404)
+
 @app.get("/homelab.gif")
 async def homelab_gif():
     """Serve the homelab pixel-art GIF."""
@@ -528,76 +538,88 @@ async def index():
 <meta http-equiv="Expires" content="0">
 <title>THE SPRAWL • Clawd Unified</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=DotGothic16&family=Pixelify+Sans&family=VT323&display=swap');
 
   :root {
-    --bg: #0a0806; --surface: #14100b; --border: #2a2018;
-    --text: #b89a6a; --text-bright: #f5c87c;
-    --cyan: #f59e0b; --green: #d97706; --red: #ef4444;
-    --amber: #fbbf24; --violet: #f59e0b; --pink: #fb923c;
-    --glow: rgba(245,158,11,0.4);
+    --bg: #070b0d; --surface: #0d1417; --border: #1a2a1f;
+    --text: #8ba692; --text-bright: #b8d4be;
+    --cyan: #2dd4a8; --green: #4ade80; --red: #dc2626;
+    --amber: #d97706; --violet: #2e6b4c; --pink: #f97316;
+    --glow: rgba(45,212,168,0.3);
   }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:var(--bg); color:var(--text); font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.5; }
+  body { background:var(--bg); color:var(--text); font-family:'Pixelify Sans',monospace; font-size:13px; line-height:1.4; }
   body::before { content:''; position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.08) 0px, rgba(0,0,0,0.08) 1px, transparent 1px, transparent 3px); z-index:9999; }
   .container { max-width:1800px; margin:0 auto; padding:16px; position:relative; z-index:1; }
   .logo-block { text-align:center; padding:12px 0 6px; margin-bottom:4px; display:flex; align-items:center; justify-content:center; gap:14px; }
-  .logo-gif { width:64px; height:64px; image-rendering:pixelated; flex-shrink:0; }
-  .logo-text-img { height:52px; width:auto; animation:logoGlitch 6s steps(1) infinite; }
-  @keyframes logoGlitch {
-    0%, 95%, 98%, 100% { transform:translate(0,0); opacity:1; }
-    96% { transform:translate(-2px,1px); opacity:0.8; }
-    97% { transform:translate(2px,-1px); opacity:0.9; }
-  }
+  .logo-gif { image-rendering:pixelated; flex-shrink:0; }
+  .logo-text-img { image-rendering:pixelated; flex-shrink:0; }
   .header { display:flex; justify-content:space-between; align-items:flex-end; padding-bottom:12px; border-bottom:1px solid var(--border); margin-bottom:16px; }
   .header .sub { font-size:9px; color:var(--amber); letter-spacing:2px; opacity:0.7; }
   .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(420px, 1fr)); gap:12px; }
   @media (min-width: 900px) { .grid { grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); } }
   @media (min-width: 1400px) { .grid { grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); } }
   .card.mini { min-width:0; }
+  .triple-row { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; grid-column:1/-1; }
   @media (min-width: 1200px) { .card.wide { grid-column:span 2; } }
+  /* Mobile: single column */
+  @media (max-width: 1200px) {
+    .grid { display:flex; flex-direction:column; gap:8px; }
+    .triple-row { display:flex; flex-direction:column; gap:8px; }
+    .card { padding:8px 8px 8px 0; }
+    .card-header { flex-direction:row !important; gap:6px; padding-bottom:4px; margin-bottom:6px; justify-content:flex-start !important; align-items:center; padding-left:0; }
+    .card-header img.card-icon { width:56px; height:56px; margin-left:0; margin-right:4px; flex-shrink:0; }
+    .card-header h3 { font-size:16px; letter-spacing:1px; }
+    .section-header { font-size:7px; }
+    body { font-size:10px; }
+    .logo-gif { width:72px; height:72px; }
+    .logo-text-img { width:160px; height:auto; }
+  }
   .card { background:var(--surface); border:1px solid var(--border); border-radius:4px; padding:12px; box-shadow:inset 0 0 30px rgba(245,158,11,0.03); transition:border-color 0.3s; }
   .card:hover { border-color:rgba(245,158,11,0.3); }
-  .card-header { display:flex; align-items:center; gap:8px; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid rgba(42,32,24,0.8); }
-  .card-header h3 { font-size:11px; color:var(--text-bright); text-transform:uppercase; letter-spacing:1px; text-shadow:0 0 10px var(--glow); }
+  .card-header { display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid rgba(42,32,24,0.8); cursor:pointer; user-select:none; }
+  .card-header:hover { color:var(--amber); }
+  .card-body.collapsed { display:none; }
+  .card-header h3 { font-family:'VT323',monospace; font-size:36px; color:var(--border); text-transform:uppercase; letter-spacing:2px; text-shadow:none; }
   .card-dot { width:8px; height:8px; border-radius:2px; box-shadow:0 0 6px currentColor; }
   .card-dot.cyan { background:var(--amber); } .card-dot.green { background:var(--green); }
   .card-dot.red { background:var(--red); } .card-dot.amber { background:var(--amber); }
   .card-dot.violet { background:var(--amber); } .card-dot.pink { background:var(--pink); }
   .card-dot.orange { background:var(--amber); }
-  .section-header { font-size:10px; color:var(--amber); margin:6px 0 4px; text-transform:uppercase; letter-spacing:1px; text-shadow:0 0 8px var(--glow); }
+  .card-icon { image-rendering:pixelated; margin-right:6px; flex-shrink:0; vertical-align:middle; }
+  .section-header { font-family:'DotGothic16',monospace; font-size:10px; color:var(--amber); margin:6px 0 4px; text-transform:uppercase; letter-spacing:0; text-shadow:0 0 8px var(--glow); }
   .stat-row { display:flex; justify-content:space-between; padding:3px 0; border-bottom:1px solid rgba(42,32,24,0.3); }
-  .stat-label { color:var(--text); font-size:10px; }
-  .stat-value { color:var(--text-bright); font-size:10px; text-align:right; }
+  .stat-label { color:var(--text); }
+  .stat-value { color:var(--text-bright); text-align:right; }
   .stat-value.green { color:var(--green); } .stat-value.crit { color:var(--red); }
   .stat-value.warn { color:var(--amber); } .stat-value.cyan { color:var(--amber); }
   .bar-wrap { height:4px; background:rgba(245,158,11,0.08); border-radius:2px; margin:2px 0 4px; }
   .bar { height:100%; border-radius:2px; transition:width 0.5s; }
   .bar.cyan { background:var(--amber); } .bar.green { background:var(--green); }
   .bar.amber { background:var(--amber); } .bar.red { background:var(--red); }
-  .svc-item { font-size:10px; padding:2px 0; border-bottom:1px solid rgba(42,32,24,0.3); }
+  .svc-item { padding:2px 0; border-bottom:1px solid rgba(42,32,24,0.3); }
   .svc-item .name { color:var(--text-bright); }
-  .svc-item .state-up { color:var(--green); margin-left:8px; font-size:9px; }
-  .svc-item .state-down { color:var(--red); margin-left:8px; font-size:9px; }
-  .svc-item .status-text { color:var(--text); font-size:9px; margin-left:8px; }
-  .journal-item { padding:3px 0; border-bottom:1px solid rgba(42,32,24,0.3); font-size:10px; }
+  .svc-item .state-up { color:var(--green); margin-left:8px; }
+  .svc-item .state-down { color:var(--red); margin-left:8px; }
+  .svc-item .status-text { color:var(--text); margin-left:8px; }
+  .journal-item { padding:3px 0; border-bottom:1px solid rgba(42,32,24,0.3); }
   .j-time { color:var(--text); margin-right:6px; }
   .j-sev-crit { color:var(--red); } .j-sev-warn { color:var(--amber); } .j-sev-info { color:var(--amber); }
-  .frigate-event { padding:2px 0; font-size:10px; border-bottom:1px solid rgba(42,32,24,0.3); }
+  .frigate-event { padding:2px 0; border-bottom:1px solid rgba(42,32,24,0.3); }
   .frigate-event .label { color:var(--amber); font-weight:700; }
-  .security-ip-row { font-size:9px; padding:2px 0; border-bottom:1px solid rgba(30,41,59,0.3); }
+  .security-ip-row { padding:2px 0; border-bottom:1px solid rgba(30,41,59,0.3); }
   .security-ip-row .ip { color:var(--amber); }
   .security-ip-row .geo { color:var(--text); }
-  .footer { text-align:center; padding:16px; color:var(--text); font-size:10px; border-top:1px solid var(--border); margin-top:16px; }
+  .footer { text-align:center; padding:16px; color:var(--text); border-top:1px solid var(--border); margin-top:16px; }
   .footer a { color:var(--amber); text-decoration:none; }
-  .section-header { font-size:10px; color:var(--amber); margin:6px 0 4px; text-transform:uppercase; letter-spacing:1px; text-shadow:0 0 8px var(--glow); }
-  .peer-row { font-size:10px; padding:1px 0; }
+  .section-header { font-family:'DotGothic16',monospace; font-size:10px; color:var(--amber); margin:6px 0 4px; text-transform:uppercase; letter-spacing:0; text-shadow:0 0 8px var(--glow); }
+  .peer-row { padding:1px 0; }
   .peer-online { color:var(--green); } .peer-offline { color:var(--red); }
-  .bus-msg { padding:4px 6px; margin:4px 0; border-radius:3px; font-size:9px; border-left:2px solid var(--border); }
+  .bus-msg { padding:4px 6px; margin:4px 0; border-radius:3px; border-left:2px solid var(--border); }
   .bus-msg.bus-hermes { border-left-color: var(--amber); } .bus-msg.bus-clawd { border-left-color: var(--pink); }
   .bus-sender { color:var(--amber); font-weight:700; margin-right:6px; }
   .bus-time { color:var(--text); font-size:8px; }
-  .bus-body { color:var(--text-bright); margin-top:2px; line-height:1.4; word-break:break-word; }
+  .bus-body { color:var(--text-bright); margin-top:2px; line-height:1.4; word-break:break-word; font-size:9px;; }
   /* Sparkline chart */
   .sparkline { display:flex; align-items:flex-end; gap:1px; height:36px; margin:4px 0 6px; }
   .sparkline .spark-bar { flex:1; min-width:2px; border-radius:1px 1px 0 0; transition:height 0.3s; }
@@ -612,28 +634,29 @@ async def index():
 <body>
 <div class="container">
   <div class="logo-block">
-    <img src="/homelab.gif" alt="" class="logo-gif">
-    <img src="/hlab.gif" alt="THE SPRAWL" class="logo-text-img">
+    <img src="/icons/resources.gif" alt="" class="logo-gif" width="96" height="96">
+    <img src="/hlab.gif" alt="THE SPRAWL" class="logo-text-img" width="256" height="101">
   </div>
   <div class="header">
     <div style="text-align:right;font-size:10px;color:var(--text);" id="uptime">UPTIME …</div>
+    <div style="text-align:center;margin-bottom:6px;"><span id="toggle-all" style="font-family:'VT323',monospace;font-size:26px;color:var(--border);cursor:pointer;user-select:none;">SHOW ALL</span></div>
   </div>
 
   <div class="grid">
-    <div class="card"><div class="card-header"><div class="card-dot cyan"></div><h3>💻 RESOURCES</h3></div><div id="res-content">Loading...</div></div>
-    <div class="card"><div class="card-header"><div class="card-dot cyan"></div><h3>🌤 WEATHER + 🔥 FIRE + 🌊 RIVER</h3></div><div id="weather-content">Loading...</div></div>
-    <div class="card"><div class="card-header"><div class="card-dot amber"></div><h3>☀️ SOLAR + 🔋 BATTERY</h3></div><canvas id="solar-chart" width="400" height="100" style="width:100%;height:100px;display:block;margin-bottom:4px;"></canvas><div id="fox-content">Loading...</div></div>
-    <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; grid-column:1/-1;">
-      <div class="card"><div class="card-header"><div class="card-dot red"></div><h3>🔒 SECURITY + 🔐 VPN</h3></div><div id="sec-content">Loading...</div><div id="net-content" style="margin-top:8px;">Loading...</div></div>
-      <div class="card"><div class="card-header"><div class="card-dot orange"></div><h3>🎥 FRIGATE</h3></div><div id="frigate-content">Loading...</div><img id="cam-feed" src="" alt="loading camera..." style="width:100%;border-radius:4px;display:block;margin-bottom:2px;" onerror="document.getElementById('cam-info').textContent='⚠️ stream offline • '+new Date().toLocaleTimeString()" onload="document.getElementById('cam-info').textContent=new Date().toLocaleTimeString()+' • 5fps detect • Frigate'"><div style="font-size:9px;color:var(--text);" id="cam-info">connecting...</div></div>
-      <div class="card"><div class="card-header"><div class="card-dot pink"></div><h3>💬 AGENT BUS</h3></div><div id="bus-content">Loading...</div></div>
+    <div class="card"><div class="card-header"><img src="/icons/resources_tube.gif" class="card-icon" alt="" width="64" height="64"><h3>// COMMAND</h3></div><div id="res-content">Loading...</div></div>
+    <div class="card"><div class="card-header"><img src="/icons/weather.gif" class="card-icon" alt="" width="64" height="64"><h3>// ATMOS</h3></div><div id="weather-content">Loading...</div></div>
+    <div class="card"><div class="card-header"><img src="/icons/solar.gif" class="card-icon" alt="" width="64" height="64"><h3>// POWER</h3></div><canvas id="solar-chart" width="400" height="100" style="width:100%;height:100px;display:block;margin-bottom:4px;"></canvas><div id="fox-content">Loading...</div></div>
+    <div class="triple-row">
+      <div class="card"><div class="card-header"><img src="/icons/security.gif" class="card-icon" alt="" width="64" height="64"><h3>// OPSEC</h3></div><div id="sec-content">Loading...</div><div id="net-content" style="margin-top:8px;">Loading...</div></div>
+      <div class="card"><div class="card-header"><img src="/icons/frigate.gif" class="card-icon" alt="" width="64" height="64"><h3>// OVERWATCH</h3></div><div id="frigate-content">Loading...</div><img id="cam-feed" src="" alt="loading camera..." style="width:100%;border-radius:4px;display:block;margin-bottom:2px;" onerror="document.getElementById('cam-info').textContent='⚠️ stream offline • '+new Date().toLocaleTimeString()" onload="document.getElementById('cam-info').textContent=new Date().toLocaleTimeString()+' • 5fps detect • Frigate'"><div style="font-size:9px;color:var(--text);" id="cam-info">connecting...</div></div>
+      <div class="card"><div class="card-header"><img src="/icons/agents_bus.gif" class="card-icon" alt="" width="64" height="64"><h3>// COMMS</h3></div><div id="bus-content">Loading...</div></div>
     </div>
-    <div class="card mini"><div class="card-header"><div class="card-dot violet"></div><h3>🖨 P1S PRINTER</h3></div><div id="p1s-content">Loading...</div></div>
-    <div class="card mini"><div class="card-header"><div class="card-dot pink"></div><h3>🐬 FLIPPER + 📻 RADIO</h3></div><div id="flipper-content">Loading...</div><div id="radio-content" style="margin-top:8px;">Loading...</div></div>
-    <div class="card mini"><div class="card-header"><div class="card-dot green"></div><h3>🐦 BIRDS</h3></div><div id="birds-content">Loading...</div></div>
-    <div class="card"><div class="card-header"><div class="card-dot cyan"></div><h3>📰 NEWS</h3></div><div id="news-content" style="font-size:9px;">Loading...</div></div>
-    <div class="card"><div class="card-header"><div class="card-dot violet"></div><h3>📓 JOURNAL</h3></div><div id="journal-content">Loading...</div></div>
-    <div class="card"><div class="card-header"><div class="card-dot violet"></div><h3>⚙️ SERVICES</h3></div><div id="svc-content">Loading...</div></div>
+    <div class="card mini"><div class="card-header"><img src="/icons/p1sprinter.gif" class="card-icon" alt="" width="64" height="64"><h3>// BAMBU P1S</h3></div><div id="p1s-content">Loading...</div></div>
+    <div class="card mini"><div class="card-header"><img src="/icons/flipper.gif" class="card-icon" alt="" width="64" height="64"><h3>// SIGINT</h3></div><div id="flipper-content">Loading...</div><div id="radio-content" style="margin-top:8px;">Loading...</div></div>
+    <div class="card mini"><div class="card-header"><img src="/icons/birds.gif" class="card-icon" alt="" width="64" height="64"><h3>// BIO-SCAN</h3></div><div id="birds-content">Loading...</div></div>
+    <div class="card"><div class="card-header"><img src="/icons/news.gif" class="card-icon" alt="" width="64" height="64"><h3>// INTEL</h3></div><div id="news-content">Loading...</div></div>
+    <div class="card"><div class="card-header"><img src="/icons/journal.gif" class="card-icon" alt="" width="48" height="48"><h3>// LOG</h3></div><div id="journal-content">Loading...</div></div>
+    <div class="card"><div class="card-header"><img src="/icons/services.gif" class="card-icon" alt="" width="64" height="64"><h3>// CONTAINERS</h3></div><div id="svc-content">Loading...</div></div>
   </div>
 </div>
 <div class="footer">THE SPRAWL • clawd unified dashboard • <span id="topic-count">0</span> MQTT topics • <a href="http://100.101.39.116:8702" target="_blank">agent bus</a> • <a href="http://100.101.39.116:8701/api/data" target="_blank">api</a></div>
@@ -696,15 +719,63 @@ function resourceBars(res) {
 }
 
 function birdHeatmap(birdnetList) {
-  if (!birdnetList.length) return '';
+  if (!birdnetList.length) return '<div style="color:var(--text);">no detections</div>';
   const max = Math.max(...birdnetList.map(b => b.count));
-  const bars = birdnetList.slice(0,8).map(b => {
-    const pct = Math.round((b.count / max) * 100);
-    const lvl = Math.min(5, Math.ceil((b.count / max) * 5));
-    return '<div class="stat-row"><span class="stat-label">'+b.species.substring(0,20)+'</span><span class="stat-value">'+
-      '<span class="heat-box heat-'+lvl+'"></span>'.repeat(Math.max(1,lvl)) + ' ×'+b.count+'</span></div>';
-  }).join('');
-  return bars;
+  // Canvas bar chart
+  const h = birdnetList.length * 28 + 4;
+  const w = 260;
+  let html = '<canvas id="bird-chart" width="'+w+'" height="'+h+'" style="width:100%;height:'+h+'px;"></canvas>';
+  setTimeout(() => {
+    const c = document.getElementById('bird-chart');
+    if (!c) return;
+    const ctx = c.getContext('2d');
+    // Convert CSS pixels to canvas pixels for HiDPI
+    const dpr = window.devicePixelRatio || 1;
+    c.width = w * dpr; c.height = h * dpr;
+    c.style.width = '100%'; c.style.height = h + 'px';
+    ctx.scale(dpr, dpr);
+
+    const barH = 20;
+    const gap = 8;
+    const labelW = 100;
+    const barMaxW = w - labelW - 50;
+
+    birdnetList.forEach((b, i) => {
+      const y = i * (barH + gap) + 4;
+      const pct = max > 0 ? b.count / max : 0;
+      const bw = Math.max(2, Math.round(pct * barMaxW));
+
+      // Label
+      ctx.fillStyle = 'var(--text)';
+      getComputedStyle(c);
+      ctx.font = '11px "Pixelify Sans", monospace';
+      ctx.fillStyle = '#8ba692';
+      ctx.textAlign = 'right';
+      ctx.fillText(b.species.substring(0,14), labelW - 4, y + 14);
+
+      // Bar background
+      ctx.fillStyle = '#0d1417';
+      ctx.fillRect(labelW + 4, y, barMaxW, barH);
+
+      // Bar fill - gradient
+      const grad = ctx.createLinearGradient(labelW + 4, y, labelW + 4 + bw, y);
+      grad.addColorStop(0, '#2dd4a8');
+      grad.addColorStop(1, '#4ade80');
+      ctx.fillStyle = grad;
+      ctx.fillRect(labelW + 4, y, bw, barH);
+
+      // Border
+      ctx.strokeStyle = '#1a2a1f';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(labelW + 4, y, barMaxW, barH);
+
+      // Count
+      ctx.fillStyle = '#b8d4be';
+      ctx.textAlign = 'left';
+      ctx.fillText('×'+b.count, labelW + 4 + bw + 4, y + 14);
+    });
+  }, 50);
+  return html;
 }
 
 const geoCache = {};
@@ -769,6 +840,7 @@ async function refresh() {
     const jails = fb.jails || {};
     let jailHTML = '';
     for (const [name, detail] of Object.entries(jails)) {
+      if (name.startsWith('nginx')) continue;
       jailHTML += '<div class="stat-row"><span class="stat-label">'+name+'</span><span class="stat-value">'+ (detail.currently_banned || 0)+' banned</span></div>';
     }
 
@@ -870,7 +942,7 @@ async function refresh() {
     // ── Agent Bus ──
     const bus = d.bus || {};
     const agents = bus.agents || [];
-    const agentsHTML = agents.map(a =>
+    const agentsHTML = agents.filter(a => a.name !== 'Unknown').map(a =>
       '<div class="stat-row"><span class="stat-label">'+ (a.emoji||'') +' '+ (a.display||a.name||'?') +'</span><span class="stat-value '+(a.active ? 'green' : 'warn')+'">'+(a.active ? '🟢' : '🔴')+'</span></div>'
     ).join('') || '<div style="color:var(--text);font-size:10px;">no agents</div>';
     const recentMsgs = (bus.recent || []).slice(0, 3).map(m => {
@@ -1051,6 +1123,38 @@ async function refresh() {
 
   } catch(e) { console.error(e); }
 }
+// ── Collapsible cards ──
+setTimeout(() => {
+  document.querySelectorAll('.card').forEach(card => {
+    const header = card.querySelector('.card-header');
+    if (!header) return;
+    const body = document.createElement('div');
+    body.className = 'card-body';
+    while (header.nextSibling) body.appendChild(header.nextSibling);
+    card.appendChild(body);
+    // Start collapsed
+    body.classList.add('collapsed');
+    header.onclick = () => body.classList.toggle('collapsed');
+  });
+
+  // SHOW ALL / HIDE ALL toggle
+  const toggleAll = document.getElementById('toggle-all');
+  if (toggleAll) {
+    toggleAll.addEventListener('click', () => {
+      const allBodies = document.querySelectorAll('.card-body');
+      const anyCollapsed = Array.from(allBodies).some(b => b.classList.contains('collapsed'));
+      allBodies.forEach(b => {
+        if (anyCollapsed) {
+          b.classList.remove('collapsed');
+        } else {
+          b.classList.add('collapsed');
+        }
+      });
+      toggleAll.textContent = anyCollapsed ? 'HIDE ALL' : 'SHOW ALL';
+    });
+  }
+}, 100);
+
 refresh();
 setInterval(refresh, 10000);
 
