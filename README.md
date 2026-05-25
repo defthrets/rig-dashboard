@@ -1,23 +1,8 @@
-#                                                                       ..                   ..    
-         .xHL                                                    x .d88"              . uW8"      
-      .-`8888hxxx~           u.      ..    .     :                5888R               `t888       
-   .H8X  `%888*"       ...ue888b   .888: x888  x888.       .u     '888R         u      8888   .   
-   888X     ..x..      888R Y888r ~`8888~'888X`?888f`   ud8888.    888R      us888u.   9888.z88N  
-  '8888k .x8888888x    888R I888>   X888  888X '888>  :888'8888.   888R   .@88 "8888"  9888  888E 
-   ?8888X    "88888X   888R I888>   X888  888X '888>  d888 '88%"   888R   9888  9888   9888  888E 
-    ?8888X    '88888>  888R I888>   X888  888X '888>  8888.+"      888R   9888  9888   9888  888E 
- H8H %8888     `8888> u8888cJ888    X888  888X '888>  8888L        888R   9888  9888   9888  888E 
-'888> 888"      8888   "*888*P"    "*88%""*88" '888!` '8888c. .+  .888B . 9888  9888  .8888  888" 
- "8` .8" ..     88*      'Y"         `~    "    `"`    "88888%    ^*888%  "888*""888"  `%888*%"   
-    `  x8888h. d*"                                       "YP'       "%     ^Y"   ^Y'      "`      
-      !""*888%~                                                                                   
-      !   `"  .                                                                                   
-      '-....:~                                                                                    
+#                                                                                     
 
 ![screenshot](screenshot.jpg)
 
-Live homelab dashboard — solar, battery, cameras, weather, security, services, agent chat. Dark cyberpunk aesthetic, single Python file, no build step.
-
+Live homelab dashboard — solar, battery, cameras, weather, security, services, agent chat. 
 ## What's on it
 
 - **Resources** — CPU, RAM, disk, swap with 60-point sparkline charts
