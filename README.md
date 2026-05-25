@@ -1,7 +1,5 @@
 # <img src="icons/hlab.gif">
 
-![screenshot](screenshot.jpg)
-
 > Live homelab dashboard. Solar, battery, cameras, weather, security, services, agent chat.  
 > Single Python file. 
 
