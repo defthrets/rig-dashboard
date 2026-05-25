@@ -4,5 +4,6 @@ ip_cache.json
 sparkline_history.json
 /tmp/
 *.log
-hlab.gif
 fox_history.json
+*.db
+*.db-*

@@ -520,7 +520,7 @@ async def homelab_gif():
 async def logo_png():
     """Serve the ASCII art logo as PNG for pixel-perfect rendering."""
     from fastapi.responses import FileResponse
-    logo_path = os.path.expanduser("~/.openclaw/workspace/data/sprawl_logo.png")
+    logo_path = os.path.expanduser("~/rig-dashboard/logo.png")
     if os.path.exists(logo_path):
         return FileResponse(logo_path, media_type="image/png")
     return Response(status_code=404)
