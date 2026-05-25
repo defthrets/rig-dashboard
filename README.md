@@ -1,4 +1,4 @@
-# <img src="icons/hlab.gif" width="36" height="14"> THE SPRAWL
+# <img src="icons/hlab.gif"> THE SPRAWL
 
 ![screenshot](screenshot.jpg)
 
@@ -7,24 +7,26 @@
 
 ---
 
-## <img src="icons/frigate.gif" width="24" height="24"> What's on it
+## <img src="icons/frigate.gif"> What's on it
 
-| <img src="icons/resources_tube.gif" width="20"> | **COMMAND** — CPU, RAM, disk, swap with 60-point sparkline charts |
-| <img src="icons/weather.gif" width="20"> | **ATMOS** — temp, wind, rain, fire danger rating (NSW RFS), Hawkesbury River level |
-| <img src="icons/solar.gif" width="20"> | **POWER** — FoxESS inverter live from LAN dongle (no cloud). Solar, home load, grid import/export, battery SOC with animated history chart |
-| <img src="icons/security.gif" width="20"> | **OPSEC** — SSH hardening, fail2ban jails, WireGuard peers with country flags, Tailscale status |
-| <img src="icons/frigate.gif" width="20"> | **OVERWATCH** — NVR camera detections with confidence %, live cam snapshot |
-| <img src="icons/agents_bus.gif" width="20"> | **COMMS** — last 3 messages between homelab agents (Hermes, Clawd, etc.) |
-| <img src="icons/p1sprinter.gif" width="20"> | **BAMBU P1S** — printer temps, print progress, filament type, error count |
-| <img src="icons/flipper.gif" width="20"> | **SIGINT** — Flipper Zero, Baofeng scanner, RTL-SDR, radio chatter DB |
-| <img src="icons/birds.gif" width="20"> | **BIO-SCAN** — BirdNET detections last hour |
-| <img src="icons/news.gif" width="20"> | **INTEL** — 8 latest ABC News RSS headlines |
-| <img src="icons/journal.gif" width="20"> | **LOG** — recent system events from sentience DB |
-| <img src="icons/services.gif" width="20"> | **CONTAINERS** — Docker containers and systemd services, running or dead |
+| | |
+|---|---|
+| <img src="icons/resources_tube.gif"> | **COMMAND** — CPU, RAM, disk, swap with 60-point sparkline charts |
+| <img src="icons/weather.gif"> | **ATMOS** — temp, wind, rain, fire danger rating (NSW RFS), Hawkesbury River level |
+| <img src="icons/solar.gif"> | **POWER** — FoxESS inverter live from LAN dongle (no cloud). Solar, home load, grid import/export, battery SOC with animated history chart |
+| <img src="icons/security.gif"> | **OPSEC** — SSH hardening, fail2ban jails, WireGuard peers with country flags, Tailscale status |
+| <img src="icons/frigate.gif"> | **OVERWATCH** — NVR camera detections with confidence %, live cam snapshot |
+| <img src="icons/agents_bus.gif"> | **COMMS** — last 3 messages between homelab agents (Hermes, Clawd, etc.) |
+| <img src="icons/p1sprinter.gif"> | **BAMBU P1S** — printer temps, print progress, filament type, error count |
+| <img src="icons/flipper.gif"> | **SIGINT** — Flipper Zero, Baofeng scanner, RTL-SDR, radio chatter DB |
+| <img src="icons/birds.gif"> | **BIO-SCAN** — BirdNET detections last hour |
+| <img src="icons/news.gif"> | **INTEL** — 8 latest ABC News RSS headlines |
+| <img src="icons/journal.gif"> | **LOG** — recent system events from sentience DB |
+| <img src="icons/services.gif"> | **CONTAINERS** — Docker containers and systemd services, running or dead |
 
 ---
 
-## <img src="icons/resources.gif" width="24" height="24"> Prerequisites
+## <img src="icons/resources.gif"> Prerequisites
 
 ### System
 - **OS:** Linux (tested on Debian Trixie)
@@ -72,7 +74,7 @@ The dashboard reads from these paths — create symlinks or adjust in `dashboard
 - FoxESS dongle accessible on LAN (polled via a separate cron job, not directly from dashboard)
 - Frigate API at `localhost:5000`
 
-### <img src="icons/weather.gif" width="16" height="16"> Optional (cards hide gracefully if unavailable)
+### <img src="icons/weather.gif"> Optional (cards hide gracefully if unavailable)
 - Flipper Zero (MQTT topic `homelab/flipper`)
 - RTL-SDR radio scanner (MQTT topic `homelab/radio`)
 - WireGuard (`sudo wg show` — requires passwordless sudo)
@@ -80,7 +82,7 @@ The dashboard reads from these paths — create symlinks or adjust in `dashboard
 
 ---
 
-## <img src="icons/p1sprinter.gif" width="24" height="24"> Install
+## <img src="icons/p1sprinter.gif"> Install
 
 ```bash
 # Clone
@@ -99,7 +101,7 @@ export MQTT_BROKER="your.mqtt.broker.ip"
 export MQTT_PORT="1883"
 ```
 
-## <img src="icons/security.gif" width="24" height="24"> Run
+## <img src="icons/security.gif"> Run
 
 ```bash
 # Direct
@@ -141,7 +143,7 @@ tailscale serve --bg --https=8443 http://127.0.0.1:8701
 
 ---
 
-## <img src="icons/agents_bus.gif" width="24" height="24"> How it works
+## <img src="icons/agents_bus.gif"> How it works
 
 | # | What happens |
 |---|-------------|
@@ -154,7 +156,7 @@ tailscale serve --bg --https=8443 http://127.0.0.1:8701
 
 ---
 
-## <img src="icons/flipper.gif" width="24" height="24"> Security
+## <img src="icons/flipper.gif"> Security
 
 > 🔐 LAN only by default — not exposed to the internet  
 > 🔐 Tailscale serve for remote access (tailnet only, not funneled)  
@@ -164,14 +166,10 @@ tailscale serve --bg --https=8443 http://127.0.0.1:8701
 
 ---
 
-## <img src="icons/solar.gif" width="24" height="24"> Responsive
+## <img src="icons/solar.gif"> Responsive
 
 | Viewport | Layout |
 |----------|--------|
 | **Desktop** (>900px) | Multi-column auto-fill grid, triple-row stays 3-column |
 | **Tablet** (600–899px) | 2-column layout |
 | **Mobile** (<600px) | Single column, compact headers |
-
----
-
-
