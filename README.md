@@ -3,7 +3,7 @@
 ![screenshot](screenshot.jpg)
 
 > Live homelab dashboard. Solar, battery, cameras, weather, security, services, agent chat.  
-> Dark cyberpunk aesthetic. Single Python file. No build step. No cloud. Just vibes.
+> Single Python file. 
 
 ---
 
