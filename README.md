@@ -174,8 +174,4 @@ tailscale serve --bg --https=8443 http://127.0.0.1:8701
 
 ---
 
-<p align="center">
-  <img src="icons/resources.gif" width="16"> 
-  <i>Runs on metal. Stays on metal. If you can breach it you're already in the house.</i>
-  <img src="icons/resources.gif" width="16">
-</p>
+
