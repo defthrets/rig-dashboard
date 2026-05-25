@@ -1,5 +1,7 @@
 # THE SPRAWL
 
+![screenshot](screenshot.jpg)
+
 Live homelab dashboard — solar, battery, cameras, weather, security, services, agent chat. Dark cyberpunk aesthetic, single Python file, no build step.
 
 ## What's on it
