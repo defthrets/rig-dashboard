@@ -31,13 +31,12 @@ Live homelab dashboard — solar, battery, cameras, weather, security, services,
 
 ### Services (all on localhost unless noted)
 - **Frigate NVR** on port 5000
-- **Agent Chat Bus** (SQLite DB at `/home/spitmux/agent-chat-web/chat.db`)
+- **Agent Chat Bus** (SQLite DB, default at `~/agent-chat-web/chat.db`)
 - **BirdNET** (SQLite DB at `~/.sentience/sentience.db`)
 - **FoxESS dongle** accessible on LAN (solar data polled directly, no cloud)
 - **Bambu P1S** on LAN (MQTT, port 8883)
 - **NetAlertX** or equivalent MQTT publisher for network devices
-- **Changedetection.io** (Docker container) for website monitoring
-- **OpenClaw gateway** for Tailscale peer info
+- **WireGuard** (`sudo wg show` — passwordless sudo required for VPN status)
 
 ### Python Packages
 ```bash
@@ -55,19 +54,17 @@ Full dependency list:
 
 ### Filesystem
 The dashboard reads from these paths — create symlinks or adjust in `dashboard.py`:
-- `~/.sentience/sentience.db` — BirdNET + system journal
-- `~/agent-chat-web/chat.db` — agent bus messages
-- `~/.openclaw/workspace/data/foxess_cache.json` — solar data cache
-- `~/.openclaw/workspace/data/river_level_state.json` — river level
-- `~/.openclaw/workspace/data/tailscale_peers.json` — Tailscale peers
+- `~/.sentience/sentience.db` — BirdNET + system journal (or your equivalent)
+- `~/agent-chat-web/chat.db` — agent bus messages (optional)
 - `~/rig-dashboard/fox_history.json` — solar history ring buffer
 - `~/rig-dashboard/sparkline_history.json` — CPU/RAM/disk history
 - `~/rig-dashboard/assets/` — pixel GIF icons and background images
+- Paths for FoxESS cache, river level, Tailscale peers can be configured in `dashboard.py`
 
 ### Network
 - **Port 8701** open on LAN (or exposed via Tailscale)
-- MQTT broker at `192.168.1.253:1883` (edit `MQTT_BROKER` in dashboard.py if different)
-- FoxESS dongle accessible (polled via `foxess_poll.py` cron, not direct from dashboard)
+- MQTT broker at your broker IP:1883 (set `MQTT_BROKER` env var or edit dashboard.py)
+- FoxESS dongle accessible on LAN (polled via a separate cron job, not directly from dashboard)
 - Frigate API at `localhost:5000`
 
 ### Optional (some cards hide gracefully if unavailable)
@@ -90,17 +87,20 @@ source venv/bin/activate
 # Install deps
 pip install fastapi uvicorn paho-mqtt psutil requests
 
-# Create asset directory and add your GIF icons
+# Create asset directory and add your own GIF icons
 mkdir -p assets
-# Drop your 64x64 pixel GIFs: resources_tube.gif, weather.gif, solar.gif,
+# Required: your 64x64 pixel GIFs — resources_tube.gif, weather.gif, solar.gif,
 # security.gif, frigate.gif, agents_bus.gif, p1sprinter.gif, flipper.gif,
 # birds.gif, news.gif, journal.gif, services.gif
-# Plus: bg-rain.gif, hlab.gif, resources.gif, logo.gif, logo-text.png
+# Plus: bg-rain.gif, hlab.gif, logo-text.png
 
-# Create state files (or point cron jobs at them):
-touch ~/.openclaw/workspace/data/foxess_cache.json
-touch ~/.openclaw/workspace/data/river_level_state.json
-touch ~/.openclaw/workspace/data/tailscale_peers.json
+# Create state files (or let your cron jobs do it):
+touch ~/rig-dashboard/fox_history.json
+touch ~/rig-dashboard/sparkline_history.json
+
+# Set env vars for your setup:
+export MQTT_BROKER="your.mqtt.broker.ip"
+export MQTT_PORT="1883"
 ```
 
 ## Run
@@ -118,8 +118,10 @@ After=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/home/spitmux/rig-dashboard
-ExecStart=/home/spitmux/rig-dashboard/venv/bin/python3 dashboard.py
+WorkingDirectory=%h/rig-dashboard
+ExecStart=%h/rig-dashboard/venv/bin/python3 dashboard.py
+Environment=MQTT_BROKER=192.168.1.253
+Environment=MQTT_PORT=1883
 Restart=always
 RestartSec=5
 
@@ -137,8 +139,9 @@ API at `http://your-server:8701/api/data`
 ## Expose via Tailscale
 
 ```bash
-# Serve on tailnet at https://homelab.tailcffbd6.ts.net:8443
+# Serve on your tailnet (replace with your MagicDNS name and port)
 tailscale serve --bg --https=8443 http://127.0.0.1:8701
+# Then visit: https://your-hostname.tailxxxxx.ts.net:8443
 ```
 
 ## How it works

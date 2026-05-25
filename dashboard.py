@@ -21,8 +21,15 @@ import uvicorn
 # MQTT integration
 import paho.mqtt.client as mqtt
 
-MQTT_BROKER = "192.168.1.253"
-MQTT_PORT = 1883
+# ── Configuration ────────────────────────────────────
+# Override these with your own values
+MQTT_BROKER = os.environ.get("MQTT_BROKER", "192.168.1.253")
+MQTT_PORT = int(os.environ.get("MQTT_PORT", "1883"))
+DASHBOARD_HOST = os.environ.get("DASHBOARD_HOST", "0.0.0.0")
+DASHBOARD_PORT = int(os.environ.get("DASHBOARD_PORT", "8701"))
+FRIGATE_URL = os.environ.get("FRIGATE_URL", "http://localhost:5000")
+AGENT_BUS_URL = os.environ.get("AGENT_BUS_URL", "http://localhost:8702")
+# ────────────────────────────────────────────────────
 mqtt_cache = {}
 
 def _mqtt_listener():
@@ -696,7 +703,7 @@ async def index():
     <div class="card"><div class="card-header"><img src="/icons/services.gif" class="card-icon" alt="" width="64" height="64"><h3>// CONTAINERS</h3></div><div id="svc-content">Loading...</div></div>
   </div>
 </div>
-<div class="footer">THE SPRAWL • clawd unified dashboard • <span id="topic-count">0</span> MQTT topics • <a href="https://homelab.tailcffbd6.ts.net:8443/api/data" target="_blank">api</a> • <a href="https://homelab.tailcffbd6.ts.net:8702" target="_blank">agent bus</a></div>
+<div class="footer">THE SPRAWL • clawd unified dashboard • <span id="topic-count">0</span> MQTT topics • <a href="/api/data" target="_blank">api</a> • <a id="bus-link" href="http://localhost:8702" target="_blank">agent bus</a></div>
 
 <script>
 // ── History ring buffers for sparklines (seeded from server) ──
@@ -992,7 +999,7 @@ async function refresh() {
       '<div class="stat-row"><span class="stat-label">Last sender</span><span class="stat-value">'+(bus.last_sender || '?')+'</span></div>' +
       '<div class="section-header">🤖 Agents</div>' + agentsHTML +
       (recentMsgs ? '<div class="section-header">💬 Recent</div>' + recentMsgs : '') +
-      '<div style="margin-top:4px;font-size:9px;color:var(--text);"><a href="https://homelab.tailcffbd6.ts.net:8702" target="_blank" style="color:var(--amber);">open bus →</a></div>';
+      '<div style="margin-top:4px;font-size:9px;color:var(--text);"><a href="http://localhost:8702" target="_blank" style="color:var(--amber);">open bus →</a></div>';
 
     // ── P1S ──
     const p1 = m['homelab/p1s/telemetry'] || {};
@@ -1230,4 +1237,4 @@ startCamFeed();
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8701, log_level="warning")
+    uvicorn.run(app, host=DASHBOARD_HOST, port=DASHBOARD_PORT, log_level="warning")
