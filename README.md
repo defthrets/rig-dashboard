@@ -1,56 +1,163 @@
 # THE SPRAWL
 
-Live homelab dashboard, everything in one spot. Solar, battery, cams, weather, news, VPN, services, agent chat. Dark cyberpunk vibe.
+Live homelab dashboard — solar, battery, cameras, weather, security, services, agent chat. Dark cyberpunk aesthetic, single Python file, no build step.
 
 ## What's on it
 
-- **Resources** — CPU, RAM, disk, swap with little sparkline charts
-- **Weather + Fire + River** — temp, wind, rain, fire danger rating, Hawkesbury/Nepean river level
-- **Solar + Battery** — FoxESS inverter live data pulled straight from the dongle on LAN, none of that cloud API rubbish. Shows solar generation, home load, grid import/export, battery charge. Has an animated chart too
-- **Security + VPN** — SSH hardening, fail2ban jails, WireGuard VPN with what server you're on and the country flag, Tailscale peers
-- **Frigate** — security camera detections, shows what it actually saw (person, car, etc.) with confidence percentage, live cam snapshot
-- **Agent Bus** — last 3 messages between the homelab agents (Hermes, Clawd, etc.)
-- **P1S Printer** — Bambu Lab P1S, temps, print progress, what file it's on
-- **Flipper + Radio** — Flipper Zero status, Baofeng scanner, RTL-SDR, radio chatter from the last 24h
-- **Birds** — what BirdNET picked up in the last hour
-- **News** — 8 latest ABC News headlines pulled from RSS
-- **Journal** — recent system events, containers going up/down, alerts
-- **Services** — Docker containers and systemd services, running or dead
+- **Resources** — CPU, RAM, disk, swap with 60-point sparkline charts
+- **Weather + Fire + River** — temp, wind, rain, fire danger rating (NSW RFS), Hawkesbury River level (WaterNSW)
+- **Power** — FoxESS inverter live from LAN dongle (no cloud). Solar, home load, grid import/export, battery SOC with animated history chart
+- **Security + VPN** — SSH hardening, fail2ban jails, WireGuard peer list with country flags, Tailscale status
+- **Frigate** — NVR camera detections with confidence %, live cam snapshot
+- **Agent Bus** — last 3 messages between homelab agents (Hermes, Clawd)
+- **Bambu P1S** — printer temps, print progress, filament type, error count
+- **SIGINT** — Flipper Zero, Baofeng scanner, RTL-SDR, radio chatter DB
+- **Birds** — BirdNET detections last hour
+- **News** — 8 latest ABC News RSS headlines
+- **Journal** — recent system events from sentience DB
+- **Services** — Docker containers and systemd services, running/dead
 
-## What you need
+## Prerequisites
 
-- Python 3.11+
-- Running on the homelab server (it talks to localhost for everything)
-- MQTT broker with homelab sensor data flowing
-- Frigate NVR on port 5000  
-- Agent bus SQLite DB
-- BirdNET and radio chatter DBs
-- Sudo for `wg show` (VPN status)
-- FoxESS dongle on your LAN (solar data)
+### System
+- **OS:** Linux (tested on Debian Trixie)
+- **Python:** 3.11+
+- **User with sudo** for `wg show` (WireGuard VPN status)
+- **Docker** accessible without sudo (or add user to `docker` group)
+- **MQTT broker** (EMQX, Mosquitto, etc.) with `homelab/#` topic namespace
+- **systemctl --user** available for user service checks
 
-## Install & Run
+### Services (all on localhost unless noted)
+- **Frigate NVR** on port 5000
+- **Agent Chat Bus** (SQLite DB at `/home/spitmux/agent-chat-web/chat.db`)
+- **BirdNET** (SQLite DB at `~/.sentience/sentience.db`)
+- **FoxESS dongle** accessible on LAN (solar data polled directly, no cloud)
+- **Bambu P1S** on LAN (MQTT, port 8883)
+- **NetAlertX** or equivalent MQTT publisher for network devices
+- **Changedetection.io** (Docker container) for website monitoring
+- **OpenClaw gateway** for Tailscale peer info
 
+### Python Packages
 ```bash
-git clone https://github.com/defthrets/rig-dashboard.git
-cd rig-dashboard
-pip install fastapi uvicorn paho-mqtt
-python3 dashboard.py
+pip install fastapi uvicorn paho-mqtt psutil requests
 ```
 
-Dashboard lives at `http://your-server-ip:8701`  
-API at `http://your-server-ip:8701/api/data` if you wanna pipe it into something else
+Full dependency list:
+| Package | Why |
+|---------|-----|
+| `fastapi` | Web framework |
+| `uvicorn` | ASGI server |
+| `paho-mqtt` | MQTT client (sensor data) |
+| `psutil` | CPU/RAM/disk metrics |
+| `requests` | Frigate API calls |
 
-## How it actually works
+### Filesystem
+The dashboard reads from these paths — create symlinks or adjust in `dashboard.py`:
+- `~/.sentience/sentience.db` — BirdNET + system journal
+- `~/agent-chat-web/chat.db` — agent bus messages
+- `~/.openclaw/workspace/data/foxess_cache.json` — solar data cache
+- `~/.openclaw/workspace/data/river_level_state.json` — river level
+- `~/.openclaw/workspace/data/tailscale_peers.json` — Tailscale peers
+- `~/rig-dashboard/fox_history.json` — solar history ring buffer
+- `~/rig-dashboard/sparkline_history.json` — CPU/RAM/disk history
+- `~/rig-dashboard/assets/` — pixel GIF icons and background images
 
-1. Fires up and connects to the local MQTT broker, subscribes to everything under `homelab/#` and caches it in memory. That's where all the sensor data comes from — Flipper, P1S, weather, security scans, the lot
-2. Every 15 minutes it hits the FoxESS dongle directly on the LAN — no API key, no cloud, just straight to the hardware. Same way the FoxESS app would talk to it except we're not sending data to China
-3. When your browser loads the page it grabs Frigate events from the API, reads the SQLite DBs for agent bus messages, bird detections, radio chatter, and the journal. Runs `sudo wg show` for VPN info, queries Docker and systemd for service status
-4. The frontend is a single page — HTML, CSS, and JS all in one file. Fetches `/api/data` every 10 seconds and redraws everything. No React, no build step, no 47MB of node_modules. Just works
-5. Sparkline charts for CPU/RAM/disk keep a 60-point ring buffer. Server seeds it with history on first load, then the browser updates it each poll
+### Network
+- **Port 8701** open on LAN (or exposed via Tailscale)
+- MQTT broker at `192.168.1.253:1883` (edit `MQTT_BROKER` in dashboard.py if different)
+- FoxESS dongle accessible (polled via `foxess_poll.py` cron, not direct from dashboard)
+- Frigate API at `localhost:5000`
+
+### Optional (some cards hide gracefully if unavailable)
+- Flipper Zero (MQTT topic `homelab/flipper`)
+- RTL-SDR radio scanner (MQTT topic `homelab/radio`)
+- WireGuard (`sudo wg show` — requires passwordless sudo)
+- systemctl user services (checked via `systemctl --user is-active`)
+
+## Install
+
+```bash
+# Clone
+git clone https://github.com/defthrets/rig-dashboard.git
+cd rig-dashboard
+
+# Create venv (recommended)
+python3 -m venv venv
+source venv/bin/activate
+
+# Install deps
+pip install fastapi uvicorn paho-mqtt psutil requests
+
+# Create asset directory and add your GIF icons
+mkdir -p assets
+# Drop your 64x64 pixel GIFs: resources_tube.gif, weather.gif, solar.gif,
+# security.gif, frigate.gif, agents_bus.gif, p1sprinter.gif, flipper.gif,
+# birds.gif, news.gif, journal.gif, services.gif
+# Plus: bg-rain.gif, hlab.gif, resources.gif, logo.gif, logo-text.png
+
+# Create state files (or point cron jobs at them):
+touch ~/.openclaw/workspace/data/foxess_cache.json
+touch ~/.openclaw/workspace/data/river_level_state.json
+touch ~/.openclaw/workspace/data/tailscale_peers.json
+```
+
+## Run
+
+```bash
+# Direct
+python3 dashboard.py
+
+# Or with systemd user service
+mkdir -p ~/.config/systemd/user
+cat > ~/.config/systemd/user/sprawl-dashboard.service << 'EOF'
+[Unit]
+Description=The Sprawl Dashboard
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/spitmux/rig-dashboard
+ExecStart=/home/spitmux/rig-dashboard/venv/bin/python3 dashboard.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
+EOF
+
+systemctl --user daemon-reload
+systemctl --user enable --now sprawl-dashboard
+```
+
+Dashboard at `http://your-server:8701`  
+API at `http://your-server:8701/api/data`
+
+## Expose via Tailscale
+
+```bash
+# Serve on tailnet at https://homelab.tailcffbd6.ts.net:8443
+tailscale serve --bg --https=8443 http://127.0.0.1:8701
+```
+
+## How it works
+
+1. **MQTT listener** connects to local broker on startup, subscribes to `homelab/#`, caches everything in memory
+2. **FoxESS** data comes from a separate cron job (`foxess_poll.py` every 15min) that writes to `foxess_cache.json`
+3. **On page load** — fetches Frigate events, reads SQLite DBs (agent bus, birds, journal), runs `sudo wg show`, queries Docker and systemd
+4. **Frontend** — single HTML/CSS/JS file served inline. Polls `/api/data` every 10 seconds. No React, no webpack, no 47MB of `node_modules`
+5. **Sparklines** — 60-point ring buffers for CPU/RAM/disk, seeded from disk on load, updated in-browser each poll
+6. **Power chart** — 90-point solar history from `fox_history.json`, shows solar/home/grid as overlapping lines
 
 ## Security
 
-- LAN only, not exposed to the internet (Tailscale if you're remote)
-- Needs passwordless sudo for `wg show`, nothing else
-- No auth on the dashboard, it's internal
-- Solar data comes from the dongle, not FoxESS Cloud — API key not needed
+- LAN only by default — not exposed to the internet
+- Tailscale serve for remote access (tailnet only, not funneled)
+- Needs passwordless sudo for `wg show` only
+- No auth on dashboard — it's internal
+- Solar data from LAN dongle, not FoxESS Cloud — no API key, no data leaving the house
+
+## Responsive
+
+- **Desktop (>900px):** Multi-column auto-fill grid, triple-row stays 3-column
+- **Tablet (600-899px):** 2-column layout
+- **Mobile (<600px):** Single column, compact headers
