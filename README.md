@@ -12,7 +12,7 @@
 | | |
 |---|---|
 | <img src="icons/resources_tube.gif"> | **COMMAND** — CPU, RAM, disk, swap with 60-point sparkline charts |
-| <img src="icons/weather.gif"> | **ATMOS** — temp, wind, rain, fire danger rating (NSW RFS), Hawkesbury River level |
+| <img src="icons/weather.gif"> | **ATMOS** — temp, wind, rain, fire danger rating (NSW RFS), Local River level |
 | <img src="icons/solar.gif"> | **POWER** — FoxESS inverter live from LAN dongle (no cloud). Solar, home load, grid import/export, battery SOC with animated history chart |
 | <img src="icons/security.gif"> | **OPSEC** — SSH hardening, fail2ban jails, WireGuard peers with country flags, Tailscale status |
 | <img src="icons/frigate.gif"> | **OVERWATCH** — NVR camera detections with confidence %, live cam snapshot |
