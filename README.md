@@ -1,4 +1,4 @@
-# <img src="icons/hlab.gif"> THE SPRAWL
+# <img src="icons/hlab.gif">
 
 ![screenshot](screenshot.jpg)
 
