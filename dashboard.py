@@ -585,14 +585,22 @@ async def index():
   .logo-text-img { image-rendering:pixelated; flex-shrink:0; }
   .header { display:flex; justify-content:space-between; align-items:flex-end; padding-bottom:12px; border-bottom:1px solid var(--border); margin-bottom:16px; }
   .header .sub { font-size:9px; color:var(--amber); letter-spacing:2px; opacity:0.7; }
-  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(420px, 1fr)); gap:12px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(380px, 1fr)); gap:12px; }
   @media (min-width: 900px) { .grid { grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); } }
   @media (min-width: 1400px) { .grid { grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); } }
   .card.mini { min-width:0; }
   .triple-row { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; grid-column:1/-1; }
-  @media (min-width: 1200px) { .card.wide { grid-column:span 2; } }
+  @media (min-width: 900px) { .card.wide { grid-column:span 2; } }
+  /* Tablet: 2-column grid, triple-row stays 3-col if possible */
+  @media (max-width: 899px) and (min-width: 601px) {
+    .grid { grid-template-columns:repeat(2, 1fr); gap:10px; }
+    .triple-row { grid-template-columns:repeat(2, 1fr); gap:10px; }
+    .triple-row .card:last-child { grid-column:1/-1; }
+    .card-header h3 { font-size:22px; }
+    .card { padding:10px; }
+  }
   /* Mobile: single column */
-  @media (max-width: 1200px) {
+  @media (max-width: 600px) {
     .grid { display:flex; flex-direction:column; gap:8px; }
     .triple-row { display:flex; flex-direction:column; gap:8px; }
     .card { padding:8px 8px 8px 0; }
@@ -688,7 +696,7 @@ async def index():
     <div class="card"><div class="card-header"><img src="/icons/services.gif" class="card-icon" alt="" width="64" height="64"><h3>// CONTAINERS</h3></div><div id="svc-content">Loading...</div></div>
   </div>
 </div>
-<div class="footer">THE SPRAWL • clawd unified dashboard • <span id="topic-count">0</span> MQTT topics • <a href="http://100.101.39.116:8702" target="_blank">agent bus</a> • <a href="http://100.101.39.116:8701/api/data" target="_blank">api</a></div>
+<div class="footer">THE SPRAWL • clawd unified dashboard • <span id="topic-count">0</span> MQTT topics • <a href="https://homelab.tailcffbd6.ts.net:8443/api/data" target="_blank">api</a> • <a href="https://homelab.tailcffbd6.ts.net:8702" target="_blank">agent bus</a></div>
 
 <script>
 // ── History ring buffers for sparklines (seeded from server) ──
@@ -984,7 +992,7 @@ async function refresh() {
       '<div class="stat-row"><span class="stat-label">Last sender</span><span class="stat-value">'+(bus.last_sender || '?')+'</span></div>' +
       '<div class="section-header">🤖 Agents</div>' + agentsHTML +
       (recentMsgs ? '<div class="section-header">💬 Recent</div>' + recentMsgs : '') +
-      '<div style="margin-top:4px;font-size:9px;color:var(--text);"><a href="http://100.101.39.116:8702" target="_blank" style="color:var(--amber);">open bus →</a></div>';
+      '<div style="margin-top:4px;font-size:9px;color:var(--text);"><a href="https://homelab.tailcffbd6.ts.net:8702" target="_blank" style="color:var(--amber);">open bus →</a></div>';
 
     // ── P1S ──
     const p1 = m['homelab/p1s/telemetry'] || {};
